@@ -1,0 +1,98 @@
+openapi: 3.0.0
+info:
+  title: Online Shop API
+  description: Optional multiline or single-line description
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api
+    description: local server
+components:
+  schemas:
+    OrderInput:
+      type: object
+      properties:
+        items:
+          type: array
+        customer_email:
+          type: string
+          format: email
+    OrderResponse:
+      type: object
+      properties:
+        order_id:
+          type: integer
+        payment_url:
+          type: string
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+        code:
+          type: integer
+paths:
+  /orders:
+    post:
+      summary: create_new_order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderInput'
+      responses:
+        '201':
+          description: order_success_created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '400':
+          description: value_error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      operationId: '1'
+  '/orders/{orderId}/status:':
+    get:
+      summary: get_order_status
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: order_status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum:
+                      - created
+                      - paid
+                      - cancelled
+                      - delivered
+        '404':
+          description: Order_not_found
+      operationId: '1'
+  /payment/callback:
+    post:
+      summary: Callback_From_Payment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderResponse'
+      responses:
+        '200':
+          description: Callback_succes
+        '400':
+          description: False_request
+      operationId: '1'
